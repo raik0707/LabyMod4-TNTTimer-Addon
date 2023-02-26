@@ -11,6 +11,7 @@ import net.labymod.api.client.gfx.GFXBridge;
 import net.labymod.api.client.options.MinecraftOptions;
 import net.labymod.api.client.render.font.RenderableComponent;
 import net.labymod.api.client.render.matrix.Stack;
+import net.labymod.api.client.world.WorldRenderer;
 import net.labymod.api.event.Phase;
 import net.labymod.api.event.Subscribe;
 import net.labymod.api.event.client.render.camera.CameraSetupEvent;
@@ -25,17 +26,14 @@ public class TNTTimeTag extends NameTag {
 
   private final TNTTimerAddon addon;
 
-  private final CameraAccessor cameraAccessor;
-
   private final DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
   private Stack currentStack = null;
 
   private final MinecraftOptions options;
 
-  public TNTTimeTag(TNTTimerAddon addon, CameraAccessor camera) {
+  public TNTTimeTag(TNTTimerAddon addon) {
     this.addon = addon;
-    this.cameraAccessor = camera;
     this.options = addon.labyAPI().minecraft().options();
   }
 
@@ -85,14 +83,15 @@ public class TNTTimeTag extends NameTag {
   private void renderTag(PrimedTnt tnt) {
     this.currentStack.push();
     // Setup position
-    FloatVector3 cameraPosition = this.cameraAccessor.position();
+    WorldRenderer worldRenderer = this.addon.labyAPI().minecraft().worldRenderer();
+    FloatVector3 cameraPosition = worldRenderer.cameraPosition();
     this.currentStack.translate(
         tnt.position().getX() - cameraPosition.getX(),
         tnt.position().getY() - cameraPosition.getY(),
         tnt.position().getZ() - cameraPosition.getZ());
     this.currentStack.translate(0, tnt.axisAlignedBoundingBox().getYSize() + 0.5F, 0);
 
-    this.currentStack.multiply(new FloatMatrix4(this.cameraAccessor.orientation()));
+    this.currentStack.multiply(new FloatMatrix4(worldRenderer.cameraRotation()));
     this.currentStack.scale(-0.025F);
     // Centering tag
     this.currentStack.translate(-this.getWidth() / 2.0F, -this.getHeight(), 0);
