@@ -4,19 +4,19 @@ plugins {
     id("net.labymod.gradle.addon")
 }
 
-group = "org.example"
+group = "de.raik"
 version = "1.0.0"
 
 java.toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 
 labyMod {
-    defaultPackageName = "org.example" //change this to your main package name (used by all modules)
+    defaultPackageName = "de.raik.tnttimer" //change this to your main package name (used by all modules)
     addonInfo {
-        namespace = "example"
-        displayName = "ExampleAddon"
-        author = "Example Author"
-        description = "Example Description"
-        minecraftVersion = "*"
+        namespace = "tnttimer"
+        displayName = "TNT Timer"
+        author = "Sk1er LLC (port by Raik)"
+        description = "Displays the time until a tnt explodes over the tnt."
+        minecraftVersion = "1.8.9,1.12.2,1.16.5<1.19.3"
         version = System.getenv().getOrDefault("VERSION", "0.0.1")
     }
 
@@ -29,7 +29,7 @@ labyMod {
                 "1.18.2",
                 "1.19.2",
                 "1.19.3",
-                "23w06a"
+                "1.19.4-pre1"
         ) { version, provider ->
             configureRun(provider, version)
         }
@@ -42,7 +42,7 @@ labyMod {
     }
 
     addonDev {
-        snapshotRelease()
+        internalRelease()
     }
 }
 

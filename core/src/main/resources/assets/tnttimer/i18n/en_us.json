@@ -1,0 +1,14 @@
+{
+  "tnttimer": {
+    "settings": {
+      "name": "TNT Timer",
+      "enabled": {
+        "name": "Enabled"
+      },
+      "colored": {
+        "name": "Colored Time",
+        "description": "The time tag will change the color dynamically depending on remaining time until the explosion."
+      }
+    }
+  }
+}
