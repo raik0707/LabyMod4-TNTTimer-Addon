@@ -84,11 +84,18 @@ public class TNTTimeTag extends NameTag {
     this.currentStack.push();
     // Setup position
     WorldRenderer worldRenderer = this.addon.labyAPI().minecraft().worldRenderer();
-    FloatVector3 cameraPosition = worldRenderer.cameraPosition();
-    this.currentStack.translate(
-        tnt.position().getX() - cameraPosition.getX(),
-        tnt.position().getY() - cameraPosition.getY(),
-        tnt.position().getZ() - cameraPosition.getZ());
+    /*
+     * Depending on the version the camera adjusted translation is made on different places
+     * for >= 1.16.5: EntityRenderEvent will be called before with stack not having the translation
+     * for 1.8.9 & 1.12.2: EntityRenderEvent will be called within the applied translation
+     */
+    if (!PlatformEnvironment.isAncientOpenGL()) {
+      FloatVector3 cameraPosition = worldRenderer.cameraPosition();
+      this.currentStack.translate(
+          tnt.position().getX() - cameraPosition.getX(),
+          tnt.position().getY() - cameraPosition.getY(),
+          tnt.position().getZ() - cameraPosition.getZ());
+    }
     this.currentStack.translate(0, tnt.axisAlignedBoundingBox().getYSize() + 0.5F, 0);
 
     this.currentStack.multiply(new FloatMatrix4(worldRenderer.cameraRotation()));

@@ -1,6 +1,5 @@
 package de.raik.tnttimer.v1_19_3.mixins.world.entity.item;
 
-import net.labymod.api.client.entity.LivingEntity;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.PrimedTnt;
@@ -28,25 +27,9 @@ public abstract class MixinPrimedTnt extends Entity {
   @Shadow
   public abstract int shadow$getFuse();
 
-  @Shadow
-  public abstract void shadow$setFuse(int fuse);
-
-  @Shadow
-  public abstract net.minecraft.world.entity.LivingEntity shadow$getOwner();
-
   @Intrinsic
   public int primedTnt$getFuse() {
     return this.shadow$getFuse();
-  }
-
-  @Intrinsic
-  public void primedTnt$setFuse(int fuse) {
-    this.shadow$setFuse(fuse);
-  }
-
-  @Intrinsic
-  public LivingEntity primedTnt$getOwner() {
-    return (LivingEntity) this.shadow$getOwner();
   }
 
 }
