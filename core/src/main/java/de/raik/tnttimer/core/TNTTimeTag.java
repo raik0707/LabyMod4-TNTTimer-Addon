@@ -1,6 +1,7 @@
 package de.raik.tnttimer.core;
 
 import java.text.DecimalFormat;
+import net.labymod.api.Laby;
 import net.labymod.api.client.component.Component;
 import net.labymod.api.client.component.format.NamedTextColor;
 import net.labymod.api.client.component.format.TextColor;
@@ -9,6 +10,7 @@ import net.labymod.api.client.entity.item.PrimedTnt;
 import net.labymod.api.client.entity.player.tag.event.NameTagBackgroundRenderEvent;
 import net.labymod.api.client.entity.player.tag.tags.NameTag;
 import net.labymod.api.client.gfx.GFXBridge;
+import net.labymod.api.client.gfx.pipeline.RenderEnvironmentContext;
 import net.labymod.api.client.options.MinecraftOptions;
 import net.labymod.api.client.render.font.RenderableComponent;
 import net.labymod.api.client.render.matrix.Stack;
@@ -107,11 +109,10 @@ public class TNTTimeTag extends NameTag {
     GFXBridge gfx = this.addon.labyAPI().gfxRenderPipeline().gfx();
 
     this.currentStack.multiply(new FloatMatrix4(worldRenderer.cameraRotation()));
+    this.currentStack.scale(-0.025F, -0.025F, 0.025F);
+    Laby.references().renderEnvironmentContext().setPackedLight(RenderEnvironmentContext.FULL_BRIGHT);
     if (PlatformEnvironment.isAncientOpenGL()) {
-      this.currentStack.scale(-0.025F, -0.025F, 0.025F);
       gfx.disableLighting();
-    } else {
-      this.currentStack.scale(-0.025F);
     }
     // Centering tag
     this.currentStack.translate(-this.getWidth() / 2.0F, -this.getHeight(), 0);
