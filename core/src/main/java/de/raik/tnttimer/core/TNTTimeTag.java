@@ -1,10 +1,11 @@
 package de.raik.tnttimer.core;
 
-import de.raik.tnttimer.api.client.entity.PrimedTnt;
 import java.text.DecimalFormat;
 import net.labymod.api.client.component.Component;
 import net.labymod.api.client.component.format.NamedTextColor;
 import net.labymod.api.client.component.format.TextColor;
+import net.labymod.api.client.entity.Entity;
+import net.labymod.api.client.entity.item.PrimedTnt;
 import net.labymod.api.client.entity.player.tag.event.NameTagBackgroundRenderEvent;
 import net.labymod.api.client.entity.player.tag.tags.NameTag;
 import net.labymod.api.client.gfx.GFXBridge;
@@ -84,26 +85,37 @@ public class TNTTimeTag extends NameTag {
     this.currentStack.push();
     // Setup position
     WorldRenderer worldRenderer = this.addon.labyAPI().minecraft().worldRenderer();
-    /*
-     * Depending on the version the camera adjusted translation is made on different places
-     * for >= 1.16.5: EntityRenderEvent will be called before with stack not having the translation
-     * for 1.8.9 & 1.12.2: EntityRenderEvent will be called within the applied translation
-     */
-    if (!PlatformEnvironment.isAncientOpenGL()) {
-      FloatVector3 cameraPosition = worldRenderer.cameraPosition();
-      this.currentStack.translate(
-          tnt.position().getX() - cameraPosition.getX(),
-          tnt.position().getY() - cameraPosition.getY(),
-          tnt.position().getZ() - cameraPosition.getZ());
+    FloatVector3 renderAdjustmentPosition;
+    if (PlatformEnvironment.isAncientOpenGL()) {
+      float partialTicks = this.addon.labyAPI().minecraft().getDelta();
+      Entity camereaEntity = this.addon.labyAPI().minecraft().cameraEntity();
+      renderAdjustmentPosition = new FloatVector3(
+          camereaEntity.getPreviousPosX() + (camereaEntity.getPosX() - camereaEntity.getPreviousPosX()) * partialTicks,
+          camereaEntity.getPreviousPosY() + (camereaEntity.getPosY() - camereaEntity.getPreviousPosY()) * partialTicks,
+          camereaEntity.getPreviousPosZ() + (camereaEntity.getPosZ() - camereaEntity.getPreviousPosZ()) * partialTicks
+      );
+    } else {
+      renderAdjustmentPosition = worldRenderer.cameraPosition();
     }
-    this.currentStack.translate(0, tnt.axisAlignedBoundingBox().getYSize() + 0.5F, 0);
+
+    this.currentStack.translate(
+        tnt.position().getX() - renderAdjustmentPosition.getX(),
+        tnt.position().getY() - renderAdjustmentPosition.getY(),
+        tnt.position().getZ() - renderAdjustmentPosition.getZ());
+    this.currentStack.translate(0,tnt.axisAlignedBoundingBox().getYSize() + 0.5F,0);
+
+    GFXBridge gfx = this.addon.labyAPI().gfxRenderPipeline().gfx();
 
     this.currentStack.multiply(new FloatMatrix4(worldRenderer.cameraRotation()));
-    this.currentStack.scale(-0.025F);
+    if (PlatformEnvironment.isAncientOpenGL()) {
+      this.currentStack.scale(-0.025F, -0.025F, 0.025F);
+      gfx.disableLighting();
+    } else {
+      this.currentStack.scale(-0.025F);
+    }
     // Centering tag
     this.currentStack.translate(-this.getWidth() / 2.0F, -this.getHeight(), 0);
 
-    GFXBridge gfx = this.addon.labyAPI().gfxRenderPipeline().gfx();
     gfx.storeBlaze3DStates();
     gfx.depthMask(false);
 
@@ -123,6 +135,7 @@ public class TNTTimeTag extends NameTag {
     this.renderText(this.currentStack, this.getRenderableComponent(), false, 0x20FFFFFF, 1, 0.5F);
     this.renderText(this.currentStack, this.getRenderableComponent(), false, -1, 1, 0.5F);
 
+    gfx.restoreBlaze3DStates();
     this.currentStack.pop();
   }
 

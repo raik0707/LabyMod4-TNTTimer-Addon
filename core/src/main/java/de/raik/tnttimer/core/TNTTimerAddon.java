@@ -9,7 +9,6 @@ public class TNTTimerAddon extends LabyAddon<TNTTimerConfig> {
   @Override
   protected void enable() {
     this.registerSettingCategory();
-    //TODO: Fix 1.8 and 1.12
     this.registerListener(new TNTTimeTag(this));
   }
 

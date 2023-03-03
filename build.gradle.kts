@@ -16,7 +16,7 @@ labyMod {
         displayName = "TNT Timer"
         author = "Sk1er LLC (port by Raik)"
         description = "Displays the time until a tnt explodes over the tnt."
-        minecraftVersion = "1.8.9,1.12.2,1.16.5<1.19.3"
+        minecraftVersion = "*"
         version = System.getenv().getOrDefault("VERSION", "0.0.1")
     }
 
@@ -29,7 +29,7 @@ labyMod {
                 "1.18.2",
                 "1.19.2",
                 "1.19.3",
-                "1.19.4-pre1"
+                "1.19.4-pre3"
         ) { version, provider ->
             configureRun(provider, version)
         }
