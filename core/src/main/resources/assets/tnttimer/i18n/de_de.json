@@ -9,6 +9,11 @@
         "name": "Farbige Zeit",
         "description": "Die Zeit-Anzeige wird ihre Farbe anhand der übrigen Zeit bis zur Explosion ändern."
       }
+    },
+    "permissions": {
+      "tnttimer": {
+        "name": "TNT Timer"
+      }
     }
   }
 }

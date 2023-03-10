@@ -10,6 +10,7 @@ public class TNTTimerAddon extends LabyAddon<TNTTimerConfig> {
   @Override
   protected void enable() {
     this.registerSettingCategory();
+    this.labyAPI().permissionRegistry().register("tnttimer", true);
     this.labyAPI().tagRegistry().register("tnttag", PositionType.ABOVE_NAME, new TNTTimeTag(this));
   }
 

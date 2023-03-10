@@ -9,6 +9,11 @@
         "name": "Colored Time",
         "description": "The time tag will change the color dynamically depending on remaining time until the explosion."
       }
+    },
+    "permissions": {
+      "tnttimer": {
+        "name": "TNT Timer"
+      }
     }
   }
 }

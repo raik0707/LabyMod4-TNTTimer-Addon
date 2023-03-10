@@ -93,7 +93,10 @@ public class TNTTimeTag extends NameTag {
 
   @Override
   protected RenderableComponent getRenderableComponent() {
-    if (!this.addon.configuration().enabled().get()) {
+    if (!this.addon.labyAPI().permissionRegistry().isPermissionEnabled(
+        "tnttimer",
+        this.addon.configuration().enabled()
+    )) {
       return null;
     }
     if (!(this.entity instanceof PrimedTnt)) {
