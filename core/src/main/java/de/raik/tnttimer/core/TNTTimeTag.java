@@ -1,7 +1,6 @@
 package de.raik.tnttimer.core;
 
 import java.text.DecimalFormat;
-import net.labymod.api.Laby;
 import net.labymod.api.client.component.Component;
 import net.labymod.api.client.component.format.NamedTextColor;
 import net.labymod.api.client.component.format.TextColor;
@@ -10,28 +9,18 @@ import net.labymod.api.client.entity.item.PrimedTnt;
 import net.labymod.api.client.entity.player.tag.event.NameTagBackgroundRenderEvent;
 import net.labymod.api.client.entity.player.tag.tags.NameTag;
 import net.labymod.api.client.gfx.GFXBridge;
-import net.labymod.api.client.gfx.pipeline.RenderEnvironmentContext;
 import net.labymod.api.client.options.MinecraftOptions;
 import net.labymod.api.client.render.font.RenderableComponent;
 import net.labymod.api.client.render.matrix.Stack;
-import net.labymod.api.client.world.WorldRenderer;
-import net.labymod.api.event.Phase;
-import net.labymod.api.event.Subscribe;
-import net.labymod.api.event.client.render.camera.CameraSetupEvent;
-import net.labymod.api.event.client.render.entity.EntityRenderEvent;
 import net.labymod.api.loader.platform.PlatformEnvironment;
 import net.labymod.api.util.ColorUtil;
 import net.labymod.api.util.math.MathHelper;
-import net.labymod.api.util.math.vector.FloatMatrix4;
-import net.labymod.api.util.math.vector.FloatVector3;
 
 public class TNTTimeTag extends NameTag {
 
   private final TNTTimerAddon addon;
 
   private final DecimalFormat decimalFormat = new DecimalFormat("0.00");
-
-  private Stack currentStack = null;
 
   private final MinecraftOptions options;
 
@@ -57,65 +46,9 @@ public class TNTTimeTag extends NameTag {
     return this.decimalFormat.format(number);
   }
 
-  /*
-   * Receiving this event because there's no closer event to access
-   * the render stack if order to use it with the Render event
-   */
-  @Subscribe
-  public void onBeforeRenderWorld(CameraSetupEvent event) {
-    if (event.phase() == Phase.POST) {
-      this.currentStack = event.stack();
-    }
-  }
-
-  @Subscribe
-  public void onRenderEntity(EntityRenderEvent event) {
-    if (event.phase() == Phase.PRE || this.currentStack == null) {
-      return;
-    }
-    if (!this.addon.configuration().enabled().get()) {
-      return;
-    }
-    if (event.entity() instanceof PrimedTnt) {
-      PrimedTnt tnt = (PrimedTnt) event.entity();
-      this.begin(tnt);
-      this.renderTag(tnt);
-    }
-  }
-
-  private void renderTag(PrimedTnt tnt) {
-    this.currentStack.push();
-    // Setup position
-    WorldRenderer worldRenderer = this.addon.labyAPI().minecraft().worldRenderer();
-    FloatVector3 renderAdjustmentPosition;
-    if (PlatformEnvironment.isAncientOpenGL()) {
-      float partialTicks = this.addon.labyAPI().minecraft().getDelta();
-      Entity camereaEntity = this.addon.labyAPI().minecraft().cameraEntity();
-      renderAdjustmentPosition = new FloatVector3(
-          camereaEntity.getPreviousPosX() + (camereaEntity.getPosX() - camereaEntity.getPreviousPosX()) * partialTicks,
-          camereaEntity.getPreviousPosY() + (camereaEntity.getPosY() - camereaEntity.getPreviousPosY()) * partialTicks,
-          camereaEntity.getPreviousPosZ() + (camereaEntity.getPosZ() - camereaEntity.getPreviousPosZ()) * partialTicks
-      );
-    } else {
-      renderAdjustmentPosition = worldRenderer.cameraPosition();
-    }
-
-    this.currentStack.translate(
-        tnt.position().getX() - renderAdjustmentPosition.getX(),
-        tnt.position().getY() - renderAdjustmentPosition.getY(),
-        tnt.position().getZ() - renderAdjustmentPosition.getZ());
-    this.currentStack.translate(0,tnt.axisAlignedBoundingBox().getYSize() + 0.5F,0);
-
+  @Override
+  public void render(Stack stack, Entity entity) {
     GFXBridge gfx = this.addon.labyAPI().gfxRenderPipeline().gfx();
-
-    this.currentStack.multiply(new FloatMatrix4(worldRenderer.cameraRotation()));
-    this.currentStack.scale(-0.025F, -0.025F, 0.025F);
-    Laby.references().renderEnvironmentContext().setPackedLight(RenderEnvironmentContext.FULL_BRIGHT);
-    if (PlatformEnvironment.isAncientOpenGL()) {
-      gfx.disableLighting();
-    }
-    // Centering tag
-    this.currentStack.translate(-this.getWidth() / 2.0F, -this.getHeight(), 0);
 
     gfx.storeBlaze3DStates();
     gfx.depthMask(false);
@@ -127,20 +60,19 @@ public class TNTTimeTag extends NameTag {
     gfx.enableBlend();
     gfx.defaultBlend();
 
-    this.renderBackground();
+    this.renderBackground(stack);
     gfx.depthMask(true);
 
     if (PlatformEnvironment.isAncientOpenGL()) {
       gfx.enableDepth();
     }
-    this.renderText(this.currentStack, this.getRenderableComponent(), false, 0x20FFFFFF, 1, 0.5F);
-    this.renderText(this.currentStack, this.getRenderableComponent(), false, -1, 1, 0.5F);
+    this.renderText(stack, this.getRenderableComponent(), false, 0x20FFFFFF, 1, 0.5F);
+    this.renderText(stack, this.getRenderableComponent(), false, -1, 1, 0.5F);
 
     gfx.restoreBlaze3DStates();
-    this.currentStack.pop();
   }
 
-  private void renderBackground() {
+  private void renderBackground(Stack stack) {
     NameTagBackgroundRenderEvent event = NameTagBackgroundRenderEvent.singleton();
     if (event.isCancelled()) {
       return;
@@ -150,7 +82,7 @@ public class TNTTimeTag extends NameTag {
     int backgroundColor = ColorUtil.toValue(event.getColor(), alpha);
 
     this.renderBackground(
-        this.currentStack,
+        stack,
         -1.0F,
         0,
         this.getWidth(),
@@ -161,6 +93,12 @@ public class TNTTimeTag extends NameTag {
 
   @Override
   protected RenderableComponent getRenderableComponent() {
+    if (!this.addon.configuration().enabled().get()) {
+      return null;
+    }
+    if (!(this.entity instanceof PrimedTnt)) {
+      return null;
+    }
     String tag = this.getTag();
     if (tag == null) {
       return null;

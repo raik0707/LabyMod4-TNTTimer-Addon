@@ -1,0 +1,14 @@
+{
+  "tnttimer": {
+    "settings": {
+      "name": "TNT Timer",
+      "enabled": {
+        "name": "Aktiviert"
+      },
+      "colored": {
+        "name": "Farbige Zeit",
+        "description": "Die Zeit-Anzeige wird ihre Farbe anhand der übrigen Zeit bis zur Explosion ändern."
+      }
+    }
+  }
+}
